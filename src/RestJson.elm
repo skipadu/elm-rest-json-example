@@ -78,8 +78,12 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
+
+
+
+-- VIEW
 
 
 type alias Post =
@@ -108,7 +112,6 @@ viewPosts model =
         Error ->
             text "Error when tried to get posts from API"
 
-        -- TODO: Use map to create elements for each and every posts
         Loaded posts ->
             div [] (List.map viewPost posts)
 
