@@ -125,15 +125,35 @@ viewPosts model =
             text "Error when tried to get posts from API"
 
         LoadedPosts posts ->
-            div [] (List.map viewPost posts)
+            div [] (List.map (viewPost model) posts)
 
 
-viewPost : Post -> Html Msg
-viewPost post =
+viewPost : Model -> Post -> Html Msg
+viewPost model post =
     div []
         [ h2 [] [ text post.title ]
         , p [] [ text post.body ]
+        , div [] [ viewPostAuthor post.userId model ]
         ]
+
+
+viewPostAuthor : Int -> Model -> Html Msg
+viewPostAuthor userId model =
+    case model.usersStatus of
+        LoadedUsers users ->
+            let
+                isPostAuthor : User -> Bool
+                isPostAuthor user =
+                    user.id == userId
+
+                postAuthorElement : User -> Html msg
+                postAuthorElement user =
+                    div [] [ text ("Author: " ++ user.username) ]
+            in
+            div [] (List.map postAuthorElement (List.filter isPostAuthor users))
+
+        _ ->
+            text ""
 
 
 viewUsers : Model -> Html Msg
