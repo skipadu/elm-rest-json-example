@@ -1,9 +1,9 @@
 module RestJson exposing (main)
 
 import Browser
-import Html exposing (Html, div, h1, h2, p, text)
+import Html exposing (Html, div, h1, h2, li, p, text, ul)
 import Http
-import Json.Decode exposing (Decoder, field, int, list, map4, string)
+import Json.Decode exposing (Decoder, field, int, list, map2, map3, map4, map5, map8, string)
 
 
 
@@ -24,28 +24,37 @@ main =
 -- MODEL
 
 
-type Status
-    = Loading
-    | Loaded (List Post)
-    | Error
+type PostsStatus
+    = LoadingPosts
+    | LoadedPosts (List Post)
+    | ErrorPosts
+
+
+type UsersStatus
+    = LoadingUsers
+    | LoadedUsers (List User)
+    | ErrorUsers
 
 
 type alias Model =
-    { status : Status
-    , placeholder : String
+    { postsStatus : PostsStatus
+    , usersStatus : UsersStatus
     }
 
 
 initialModel : Model
 initialModel =
-    { status = Loading
-    , placeholder = "Just a placeholder"
+    { postsStatus = LoadingPosts
+    , usersStatus = LoadingUsers
     }
 
 
 initialCmd : Cmd Msg
 initialCmd =
-    postsFromApi
+    Cmd.batch
+        [ postsFromApi
+        , usersFromApi
+        ]
 
 
 init : () -> ( Model, Cmd Msg )
@@ -59,6 +68,7 @@ init _ =
 
 type Msg
     = GotPosts (Result Http.Error (List Post))
+    | GotUsers (Result Http.Error (List User))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,10 +77,18 @@ update msg model =
         GotPosts result ->
             case result of
                 Ok posts ->
-                    ( { model | status = Loaded posts }, Cmd.none )
+                    ( { model | postsStatus = LoadedPosts posts }, Cmd.none )
 
                 Err _ ->
-                    ( { model | status = Error }, Cmd.none )
+                    ( { model | postsStatus = ErrorPosts }, Cmd.none )
+
+        GotUsers result ->
+            case result of
+                Ok users ->
+                    ( { model | usersStatus = LoadedUsers users }, Cmd.none )
+
+                Err _ ->
+                    ( { model | usersStatus = ErrorUsers }, Cmd.none )
 
 
 
@@ -91,20 +109,22 @@ view model =
     div []
         [ h1 [] [ text "RestJson" ]
         , div []
-            [ viewPosts model ]
+            [ viewPosts model
+            , viewUsers model
+            ]
         ]
 
 
 viewPosts : Model -> Html Msg
 viewPosts model =
-    case model.status of
-        Loading ->
+    case model.postsStatus of
+        LoadingPosts ->
             text "Loading..."
 
-        Error ->
+        ErrorPosts ->
             text "Error when tried to get posts from API"
 
-        Loaded posts ->
+        LoadedPosts posts ->
             div [] (List.map viewPost posts)
 
 
@@ -113,6 +133,30 @@ viewPost post =
     div []
         [ h2 [] [ text post.title ]
         , p [] [ text post.body ]
+        ]
+
+
+viewUsers : Model -> Html Msg
+viewUsers model =
+    case model.usersStatus of
+        LoadingUsers ->
+            text "Loading users..."
+
+        ErrorUsers ->
+            text "Error when tried to get users from API"
+
+        LoadedUsers users ->
+            div [] (List.map viewUser users)
+
+
+viewUser : User -> Html Msg
+viewUser user =
+    div []
+        [ h2 [] [ text user.name ]
+        , ul []
+            [ li [] [ text user.username ]
+            , li [] [ text user.email ]
+            ]
         ]
 
 
@@ -144,3 +188,87 @@ postDecoder =
         (field "id" int)
         (field "title" string)
         (field "body" string)
+
+
+usersFromApi : Cmd Msg
+usersFromApi =
+    Http.get
+        { url = "https://jsonplaceholder.typicode.com/users"
+        , expect = Http.expectJson GotUsers (list userDecoder)
+        }
+
+
+type alias Geo =
+    { lat : String
+    , lng : String
+    }
+
+
+geoDecoder : Decoder Geo
+geoDecoder =
+    map2
+        (\lat lng -> { lat = lat, lng = lng })
+        (field "lat" string)
+        (field "lng" string)
+
+
+type alias Address =
+    { street : String
+    , suite : String
+    , city : String
+    , zipcode : String
+    , geo : Geo
+    }
+
+
+addressDecoder : Decoder Address
+addressDecoder =
+    map5
+        (\street suite city zipcode geo -> { street = street, suite = suite, city = city, zipcode = zipcode, geo = geo })
+        (field "street" string)
+        (field "suite" string)
+        (field "city" string)
+        (field "zipcode" string)
+        (field "geo" geoDecoder)
+
+
+type alias Company =
+    { name : String
+    , catchPhrase : String
+    , bs : String
+    }
+
+
+companyDecoder : Decoder Company
+companyDecoder =
+    map3
+        (\name catchPhrase bs -> { name = name, catchPhrase = catchPhrase, bs = bs })
+        (field "name" string)
+        (field "catchPhrase" string)
+        (field "bs" string)
+
+
+type alias User =
+    { id : Int
+    , name : String
+    , username : String
+    , email : String
+    , address : Address
+    , phone : String
+    , website : String
+    , company : Company
+    }
+
+
+userDecoder : Decoder User
+userDecoder =
+    map8
+        (\id name username email address phone website company -> { id = id, name = name, username = username, email = email, address = address, phone = phone, website = website, company = company })
+        (field "id" int)
+        (field "name" string)
+        (field "username" string)
+        (field "email" string)
+        (field "address" addressDecoder)
+        (field "phone" string)
+        (field "website" string)
+        (field "company" companyDecoder)
