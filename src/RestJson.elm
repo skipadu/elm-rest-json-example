@@ -1,7 +1,7 @@
 module RestJson exposing (main)
 
 import Browser
-import Html exposing (Html, div, h1, text)
+import Html exposing (Html, div, h1, h2, p, text)
 import Http
 import Json.Decode exposing (Decoder, field, int, list, map4, string)
 
@@ -86,14 +86,6 @@ subscriptions _ =
 -- VIEW
 
 
-type alias Post =
-    { userId : Int
-    , id : Int
-    , title : String
-    , body : String
-    }
-
-
 view : Model -> Html Msg
 view model =
     div []
@@ -119,7 +111,9 @@ viewPosts model =
 viewPost : Post -> Html Msg
 viewPost post =
     div []
-        [ text ("Title" ++ post.title) ]
+        [ h2 [] [ text post.title ]
+        , p [] [ text post.body ]
+        ]
 
 
 
@@ -132,6 +126,14 @@ postsFromApi =
         { url = "https://jsonplaceholder.typicode.com/posts"
         , expect = Http.expectJson GotPosts (list postDecoder)
         }
+
+
+type alias Post =
+    { userId : Int
+    , id : Int
+    , title : String
+    , body : String
+    }
 
 
 postDecoder : Decoder Post
