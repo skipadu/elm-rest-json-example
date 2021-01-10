@@ -142,15 +142,29 @@ viewPostAuthor userId model =
     case model.usersStatus of
         LoadedUsers users ->
             let
-                isPostAuthor : User -> Bool
-                isPostAuthor user =
-                    user.id == userId
+                find : (User -> Bool) -> List User -> Maybe User
+                find predicate list =
+                    case list of
+                        [] ->
+                            Nothing
 
-                postAuthorElement : User -> Html msg
+                        first :: rest ->
+                            if predicate first then
+                                Just first
+
+                            else
+                                find predicate rest
+
+                postAuthorElement : Maybe User -> Html msg
                 postAuthorElement user =
-                    div [] [ text ("Author: " ++ user.username) ]
+                    case user of
+                        Just u ->
+                            div [] [ text ("Author: " ++ u.username) ]
+
+                        _ ->
+                            text ""
             in
-            div [] (List.map postAuthorElement (List.filter isPostAuthor users))
+            div [] [ postAuthorElement (find (\user -> user.id == userId) users) ]
 
         _ ->
             text ""
