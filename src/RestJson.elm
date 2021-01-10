@@ -1,7 +1,7 @@
 module RestJson exposing (main)
 
 import Browser
-import Html exposing (Html, div, h1, h2, li, p, text, ul)
+import Html exposing (Html, div, h1, h2, h3, li, p, text, ul)
 import Http
 import Json.Decode exposing (Decoder, field, int, list, map2, map3, map4, map5, map8, string)
 
@@ -109,8 +109,14 @@ view model =
     div []
         [ h1 [] [ text "RestJson" ]
         , div []
-            [ viewPosts model
-            , viewUsers model
+            [ div []
+                [ h2 [] [ text "Posts" ]
+                , viewPosts model
+                ]
+            , div []
+                [ h2 [] [ text "Users" ]
+                , viewUsers model
+                ]
             ]
         ]
 
@@ -131,7 +137,7 @@ viewPosts model =
 viewPost : Model -> Post -> Html Msg
 viewPost model post =
     div []
-        [ h2 [] [ text post.title ]
+        [ h3 [] [ text post.title ]
         , p [] [ text post.body ]
         , div [] [ viewPostAuthor post.userId model ]
         ]
@@ -186,7 +192,7 @@ viewUsers model =
 viewUser : User -> Html Msg
 viewUser user =
     div []
-        [ h2 [] [ text user.name ]
+        [ h3 [] [ text user.name ]
         , ul []
             [ li [] [ text user.username ]
             , li [] [ text user.email ]
