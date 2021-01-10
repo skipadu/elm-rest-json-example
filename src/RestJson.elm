@@ -3,7 +3,8 @@ module RestJson exposing (main)
 import Browser
 import Html exposing (Html, div, h1, h2, h3, li, p, text, ul)
 import Http
-import Json.Decode exposing (Decoder, field, int, list, map2, map3, map4, map5, map8, string)
+import Json.Decode exposing (Decoder, int, list, string, succeed)
+import Json.Decode.Pipeline exposing (required)
 
 
 
@@ -222,11 +223,11 @@ type alias Post =
 
 postDecoder : Decoder Post
 postDecoder =
-    map4 Post
-        (field "userId" int)
-        (field "id" int)
-        (field "title" string)
-        (field "body" string)
+    succeed Post
+        |> required "userId" int
+        |> required "id" int
+        |> required "title" string
+        |> required "body" string
 
 
 usersFromApi : Cmd Msg
@@ -245,9 +246,9 @@ type alias Geo =
 
 geoDecoder : Decoder Geo
 geoDecoder =
-    map2 Geo
-        (field "lat" string)
-        (field "lng" string)
+    succeed Geo
+        |> required "lat" string
+        |> required "lng" string
 
 
 type alias Address =
@@ -261,12 +262,12 @@ type alias Address =
 
 addressDecoder : Decoder Address
 addressDecoder =
-    map5 Address
-        (field "street" string)
-        (field "suite" string)
-        (field "city" string)
-        (field "zipcode" string)
-        (field "geo" geoDecoder)
+    succeed Address
+        |> required "street" string
+        |> required "suite" string
+        |> required "city" string
+        |> required "zipcode" string
+        |> required "geo" geoDecoder
 
 
 type alias Company =
@@ -278,10 +279,10 @@ type alias Company =
 
 companyDecoder : Decoder Company
 companyDecoder =
-    map3 Company
-        (field "name" string)
-        (field "catchPhrase" string)
-        (field "bs" string)
+    succeed Company
+        |> required "name" string
+        |> required "catchPhrase" string
+        |> required "bs" string
 
 
 type alias User =
@@ -298,12 +299,12 @@ type alias User =
 
 userDecoder : Decoder User
 userDecoder =
-    map8 User
-        (field "id" int)
-        (field "name" string)
-        (field "username" string)
-        (field "email" string)
-        (field "address" addressDecoder)
-        (field "phone" string)
-        (field "website" string)
-        (field "company" companyDecoder)
+    succeed User
+        |> required "id" int
+        |> required "name" string
+        |> required "username" string
+        |> required "email" string
+        |> required "address" addressDecoder
+        |> required "phone" string
+        |> required "website" string
+        |> required "company" companyDecoder
