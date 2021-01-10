@@ -222,8 +222,7 @@ type alias Post =
 
 postDecoder : Decoder Post
 postDecoder =
-    map4
-        (\userId id title body -> { userId = userId, id = id, title = title, body = body })
+    map4 Post
         (field "userId" int)
         (field "id" int)
         (field "title" string)
@@ -246,8 +245,7 @@ type alias Geo =
 
 geoDecoder : Decoder Geo
 geoDecoder =
-    map2
-        (\lat lng -> { lat = lat, lng = lng })
+    map2 Geo
         (field "lat" string)
         (field "lng" string)
 
@@ -263,8 +261,7 @@ type alias Address =
 
 addressDecoder : Decoder Address
 addressDecoder =
-    map5
-        (\street suite city zipcode geo -> { street = street, suite = suite, city = city, zipcode = zipcode, geo = geo })
+    map5 Address
         (field "street" string)
         (field "suite" string)
         (field "city" string)
@@ -281,8 +278,7 @@ type alias Company =
 
 companyDecoder : Decoder Company
 companyDecoder =
-    map3
-        (\name catchPhrase bs -> { name = name, catchPhrase = catchPhrase, bs = bs })
+    map3 Company
         (field "name" string)
         (field "catchPhrase" string)
         (field "bs" string)
@@ -302,8 +298,7 @@ type alias User =
 
 userDecoder : Decoder User
 userDecoder =
-    map8
-        (\id name username email address phone website company -> { id = id, name = name, username = username, email = email, address = address, phone = phone, website = website, company = company })
+    map8 User
         (field "id" int)
         (field "name" string)
         (field "username" string)
